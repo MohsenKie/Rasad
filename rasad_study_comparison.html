@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مقایسه مطالعه کاربران | رصد مطالعه</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1020;--card:#121a2e;--line:#27324a;--text:#eef2ff;--muted:#9aa8c7;--accent:#8b9cff;--green:#57d6a0;--red:#ff7f91}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#182344 0,var(--bg) 55%);color:var(--text);font-family:Tahoma,Arial,sans-serif;min-height:100vh;padding:24px}
+.wrap{max-width:900px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}.brand{display:flex;align-items:center;gap:12px}.logo{width:45px;height:45px;border-radius:14px;background:var(--accent);color:#10162b;display:grid;place-items:center;font-size:25px;font-weight:900}.eyebrow{font-size:12px;color:var(--muted)}h1{font-size:24px;margin:4px 0}h2{font-size:17px;margin:0 0 12px}p{color:var(--muted);line-height:1.9;font-size:13px}.card{background:rgba(18,26,46,.94);border:1px solid var(--line);border-radius:16px;padding:20px;margin:14px 0}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.field{flex:1;min-width:180px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}input{width:100%;background:#0c1325;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:11px;font:inherit}button,.linkbtn{background:var(--accent);color:#10162b;border:0;border-radius:10px;padding:11px 14px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}button.secondary,.linkbtn.secondary{background:transparent;color:var(--text);border:1px solid var(--line)}.msg{font-size:13px;color:var(--green);margin-top:12px;overflow-wrap:anywhere}.msg.error{color:var(--red)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;min-width:520px}th,td{text-align:right;padding:12px;border-bottom:1px solid var(--line);font-size:13px}th{color:var(--muted);font-weight:600}.rank{color:var(--accent);font-weight:800}.empty{text-align:center;color:var(--muted);padding:26px}.privacy{font-size:12px;border-right:3px solid var(--green);padding-right:10px}.hidden{display:none!important}.top-actions{display:flex;gap:8px;flex-wrap:wrap}.period-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}.period-btn{min-width:92px}.period-btn.active{background:var(--green);color:#10162b;border:1px solid var(--green)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+ <div class="brand"><div class="logo">ر</div><div><div class="eyebrow">داشبورد شخصی کنکور ارشد</div><h1>مقایسه ساعت مطالعه کاربران</h1></div></div>
+ <div class="top-actions"><a class="linkbtn secondary" href="rasad_study_dashboard_with_comparison.html">بازگشت به داشبورد</a><button id="signOut" class="secondary hidden" type="button">خروج</button></div>
+</header>
+<section class="card" id="loginCard">
+ <h2>ورود به حساب</h2><p>برای دیدن جدول مقایسه باید وارد حساب رصد مطالعه شوی. اگر از صفحه اصلی وارد شده باشی، ممکن است ورودت از قبل فعال باشد.</p>
+ <div class="row"><div class="field"><label for="email">ایمیل</label><input id="email" type="email" autocomplete="username" inputmode="email" autocapitalize="none"></div><div class="field"><label for="password">رمز عبور</label><input id="password" type="password" autocomplete="current-password"></div><button id="login" type="button">ورود</button></div>
+ <div id="loginMsg" class="msg"></div>
+</section>
+<section class="card hidden" id="joinCard">
+ <h2>شرکت در مقایسه</h2>
+ <p class="privacy">شرکت‌کردن اختیاری است. فقط نام نمایشی و مجموع ساعت مطالعه در بازه انتخابی نمایش داده می‌شود؛ ایمیل، یادداشت‌ها، درس‌ها و جزئیات روزانه نمایش داده نمی‌شوند.</p>
+ <div class="row"><div class="field"><label for="displayName">نام نمایشی (۲ تا ۲۴ نویسه)</label><input id="displayName" maxlength="24" placeholder="مثلاً داوطلب ۱۴۰۶"></div><button id="join" type="button">ثبت‌نام در جدول مقایسه</button><button id="leave" class="secondary hidden" type="button">خروج از مقایسه</button></div>
+ <div id="joinMsg" class="msg"></div>
+</section>
+<section class="card hidden" id="boardCard">
+ <div class="row" style="justify-content:space-between"><div><h2>جدول مقایسه</h2><p id="periodDescription">رتبه‌بندی بر اساس ساعت مطالعه امروز.</p></div><button id="refresh" class="secondary" type="button">به‌روزرسانی</button></div>
+ <div class="period-tabs" role="group" aria-label="بازه مقایسه">
+  <button class="period-btn active" data-period="daily" type="button">روزانه</button>
+  <button class="period-btn secondary" data-period="weekly" type="button">هفتگی</button>
+  <button class="period-btn secondary" data-period="total" type="button">کل مدت</button>
+ </div>
+ <div class="table-wrap"><table><thead><tr><th>رتبه</th><th>نام نمایشی</th><th id="hoursHeading">ساعت امروز</th></tr></thead><tbody id="boardBody"><tr><td colspan="3" class="empty">در حال دریافت اطلاعات…</td></tr></tbody></table></div>
+ <div id="boardMsg" class="msg"></div>
+</section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://eeizryrjeswxxaohhcrf.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY='sb_publishable_NxXAYqA5K4tqx1j9yxoSRw_U1WWLdel';
+const supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
+const $=id=>document.getElementById(id);let currentUser=null;
+const fmt=n=>new Intl.NumberFormat('fa-IR',{maximumFractionDigits:1}).format(Number(n)||0);
+function message(id,text,error=false){$(id).textContent=text;$(id).classList.toggle('error',error)}
+function totalHours(state){return Object.values(state?.entries||{}).reduce((s,v)=>s+(Number(v?.hours)||0),0)}
+function isoToday(){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
+function dailyHours(state){const today=isoToday();return Number(state?.entries?.[today]?.hours)||0}
+function lastSevenHours(state){const today=isoToday(),d=new Date();d.setDate(d.getDate()-6);const start=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;return Object.entries(state?.entries||{}).reduce((s,[date,v])=>s+(date>=start&&date<=today?(Number(v?.hours)||0):0),0)}
+let selectedPeriod='daily';
+function setLoggedIn(user){currentUser=user;$('loginCard').classList.toggle('hidden',!!user);$('joinCard').classList.toggle('hidden',!user);$('boardCard').classList.toggle('hidden',!user);$('signOut').classList.toggle('hidden',!user)}
+async function loadBoard(){
+ if(!currentUser)return;
+ const col={daily:'daily_hours',weekly:'weekly_hours',total:'total_hours'}[selectedPeriod];
+ const label={daily:'ساعت مطالعه امروز',weekly:'ساعت مطالعه ۷ روز اخیر',total:'مجموع ساعت مطالعه از ابتدا'}[selectedPeriod];
+ $('periodDescription').textContent={daily:'رتبه‌بندی بر اساس ساعت مطالعه ثبت‌شده برای امروز.',weekly:'رتبه‌بندی بر اساس مجموع ساعت مطالعه ۷ روز اخیر.',total:'رتبه‌بندی بر اساس مجموع ساعت مطالعه ثبت‌شده از ابتدا.'}[selectedPeriod];
+ $('hoursHeading').textContent=label;
+ $('boardBody').innerHTML='<tr><td colspan="3" class="empty">در حال دریافت اطلاعات…</td></tr>';
+ const {data,error}=await supabaseClient.from('study_leaderboard').select(`user_id,display_name,${col},updated_at`).order(col,{ascending:false}).limit(100);
+ if(error){$('boardBody').innerHTML='<tr><td colspan="3" class="empty">جدول هنوز آماده نیست یا دسترسی برقرار نشده است.</td></tr>';message('boardMsg','اگر جدول قبلاً ساخته شده، اسکریپت SQL به‌روزرسانی جدول مقایسه را در Supabase اجرا کن. جزئیات: '+error.message,true);return}
+ message('boardMsg',data.length?'رتبه‌بندی بر اساس آخرین اطلاعات همگام‌شده کاربران است.':'هنوز کسی در مقایسه شرکت نکرده است.');
+ const body=$('boardBody');body.innerHTML='';
+ if(!data.length){body.innerHTML='<tr><td colspan="3" class="empty">هنوز کسی در جدول مقایسه ثبت‌نام نکرده است.</td></tr>';return}
+ data.forEach((r,i)=>{const tr=document.createElement('tr');[String(i+1),r.display_name,fmt(r[col])+' ساعت'].forEach((v,j)=>{const td=document.createElement('td');td.textContent=v;if(j===0)td.className='rank';tr.appendChild(td)});body.appendChild(tr)})
+}
+async function refreshMembership(){
+ if(!currentUser)return;
+ const {data,error}=await supabaseClient.from('study_leaderboard').select('display_name').eq('user_id',currentUser.id).maybeSingle();
+ if(error){message('joinMsg','خطا در بررسی وضعیت شرکت: '+error.message,true);return}
+ if(data){$('displayName').value=data.display_name;$('join').textContent='ذخیره نام نمایشی';$('leave').classList.remove('hidden')}else{$('join').textContent='ثبت‌نام در جدول مقایسه';$('leave').classList.add('hidden')}
+ await loadBoard();
+}
+async function joinBoard(){
+ if(!currentUser){message('loginMsg','ابتدا وارد حساب شو.',true);return}
+ const name=$('displayName').value.trim();if(name.length<2||name.length>24){message('joinMsg','نام نمایشی باید بین ۲ تا ۲۴ نویسه باشد.',true);return}
+ message('joinMsg','در حال ثبت…');
+ const {data,error:readError}=await supabaseClient.from('dashboard_state').select('state').eq('user_id',currentUser.id).maybeSingle();
+ if(readError){message('joinMsg','خواندن اطلاعات مطالعه ناموفق بود: '+readError.message,true);return}
+ const state=data?.state||{};
+ const {error}=await supabaseClient.from('study_leaderboard').upsert({user_id:currentUser.id,display_name:name,total_hours:Math.round(totalHours(state)*100)/100,weekly_hours:Math.round(lastSevenHours(state)*100)/100,daily_hours:Math.round(dailyHours(state)*100)/100,updated_at:new Date().toISOString()},{onConflict:'user_id'});
+ if(error){message('joinMsg','ثبت‌نام ناموفق بود: '+error.message,true);return}
+ message('joinMsg','در جدول مقایسه ثبت شدی. از این به بعد با ذخیره اطلاعات در داشبورد، ساعت‌ها به‌روزرسانی می‌شوند.');
+ $('join').textContent='ذخیره نام نمایشی';$('leave').classList.remove('hidden');await loadBoard();
+}
+async function leaveBoard(){
+ if(!currentUser)return;
+ const {error}=await supabaseClient.from('study_leaderboard').delete().eq('user_id',currentUser.id);
+ if(error){message('joinMsg','خروج از جدول ناموفق بود: '+error.message,true);return}
+ message('joinMsg','از جدول مقایسه خارج شدی؛ اطلاعاتت دیگر نمایش داده نمی‌شود.');
+ $('join').textContent='ثبت‌نام در جدول مقایسه';$('leave').classList.add('hidden');await loadBoard();
+}
+$('login').onclick=async()=>{message('loginMsg','در حال ورود…');const {data,error}=await supabaseClient.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){message('loginMsg',error.message,true);return}setLoggedIn(data.user);await refreshMembership()};
+$('password').addEventListener('keydown',e=>{if(e.key==='Enter')$('login').click()});
+$('join').onclick=joinBoard;$('leave').onclick=leaveBoard;$('refresh').onclick=loadBoard;document.querySelectorAll('.period-btn').forEach(btn=>btn.addEventListener('click',()=>{selectedPeriod=btn.dataset.period;document.querySelectorAll('.period-btn').forEach(b=>{const active=b===btn;b.classList.toggle('active',active);b.classList.toggle('secondary',!active)});loadBoard()}));
+$('signOut').onclick=async()=>{await supabaseClient.auth.signOut();setLoggedIn(null)};
+supabaseClient.auth.getSession().then(async({data,error})=>{if(error){message('loginMsg',error.message,true);return}if(data.session?.user){setLoggedIn(data.session.user);await refreshMembership()}});
+supabaseClient.auth.onAuthStateChange((_event,session)=>{setLoggedIn(session?.user||null);if(session?.user)setTimeout(refreshMembership,0)});
+</script>
+</body>
+</html>
