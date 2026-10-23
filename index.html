@@ -393,7 +393,14 @@ async function initializeCloudSession(session){
    if(!state.entries||typeof state.entries!=='object')state.entries={};if(!Array.isArray(state.cycles))state.cycles=[];if(!Array.isArray(state.subjects))state.subjects=[];if(!state.subjectColors||typeof state.subjectColors!=='object')state.subjectColors={};
    localStorage.setItem(STORE,JSON.stringify(state));
  }else{
-   // First login: preserve and migrate the existing browser data to this account.
+   // Account isolation: never copy browser-wide localStorage data into a newly seen account.
+   // Keep a one-time local recovery copy before switching this browser to the new account's blank state.
+   try {
+     const backupKey='rasad-study-pre-isolation-backup-v1';
+     if(!localStorage.getItem(backupKey)) localStorage.setItem(backupKey,JSON.stringify({savedAt:new Date().toISOString(),state:JSON.parse(JSON.stringify(state))}));
+   } catch(e) { console.warn('Could not create local recovery backup:',e); }
+   state={entries:{},goalHours:1200,examDate:'',cycles:[],subjectColors:{},subjects:[]};
+   localStorage.setItem(STORE,JSON.stringify(state));
    const {error:insertError}=await supabaseClient.from('dashboard_state').upsert({user_id:currentUser.id,state:JSON.parse(JSON.stringify(state)),updated_at:new Date().toISOString()},{onConflict:'user_id'});
    if(insertError){currentUser=null;$('authOverlay').style.display='flex';showAuthMessage('ذخیره اولیه ناموفق بود: '+insertError.message,true);return}
  }
